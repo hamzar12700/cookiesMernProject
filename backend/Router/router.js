@@ -17,6 +17,9 @@ router.post("/logout",(req,res)=>{
     })
 })
 
+
+
+
 router.get("/profile", verifyToken , (req,res)=>{
     return res.json({
         status : true,

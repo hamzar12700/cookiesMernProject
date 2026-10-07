@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const userModel = require("../Models/user.model");
 const responseHandler = require("../utils/response");
+const { default: nodemailer } = require("nodemailer");
 
 async function signUp(req, res) {
     try {
@@ -14,9 +15,30 @@ async function signUp(req, res) {
             username, email, password
         })
         await user.save();
+
+   const otp = Math.floor(10000+Math.random()*90000);
+
+        const transporter = nodemailer.createTransport({
+            host : "smtp.gmail.com",
+            port : 587,
+            secure : false,
+            auth : {
+                user : process.env.EMAIL,
+                pass : process.env.APP_PASSWORD,
+            }
+        })
+
+        await transporter.sendMail({
+            from : process.env.EMAIL,
+            to : email , 
+            cc: "shahbaz@aptechsite.net", 
+            subject : "Your OTP IS Here",
+            text : `Your OTP IS ${otp}`
+        })
+
         return res.json({
             status: true,
-            message: "Data Inserted Successfully"
+            message: "Your OTP is send to your account...!!!"
         })
 
     } catch (error) {
@@ -67,6 +89,16 @@ async function login(req, res) {
             sameSite: "lax",
             maxAge: 24 * 60 * 60 * 1000
         })
+
+     
+        try {
+  await transporter.verify();
+  console.log("Server is ready to take our messages");
+} catch (err) {
+  console.error("Verification failed:", err);
+}
+
+
         return res.json({
             status: true,
             message: "User LoggedIn Successfully",
